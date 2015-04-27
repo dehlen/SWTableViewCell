@@ -13,7 +13,7 @@ static NSString * const kTableViewCellContentView = @"UITableViewCellContentView
 
 #define kSectionIndexWidth 15
 #define kAccessoryTrailingSpace 15
-#define kLongPressMinimumDuration 0.16f
+#define kLongPressMinimumDuration 0.1f
 
 @interface SWTableViewCell () <UIScrollViewDelegate,  UIGestureRecognizerDelegate>
 
@@ -187,7 +187,6 @@ static NSString * const kTableViewPanState = @"state";
 
 - (void)dealloc
 {
-    _cellScrollView.delegate = nil;
     [self removeOldTableViewPanObserver];
 }
 
@@ -391,6 +390,10 @@ static NSString * const kTableViewPanState = @"state";
         // Cell is already highlighted; clearing it temporarily seems to address visual anomaly.
         [self setHighlighted:NO animated:NO];
         [self scrollViewTapped:gestureRecognizer];
+        if ([self.delegate respondsToSelector:@selector(swipeableTableViewCellDidEndLongPress:)])
+        {
+            [self.delegate swipeableTableViewCellDidEndLongPress:self];
+        }
     }
     
     else if (gestureRecognizer.state == UIGestureRecognizerStateCancelled)
@@ -748,10 +751,6 @@ static NSString * const kTableViewPanState = @"state";
     }
     
     [self updateCellState];
-    
-    if (self.delegate && [self.delegate respondsToSelector:@selector(swipeableTableViewCell:didScroll:)]) {
-        [self.delegate swipeableTableViewCell:self didScroll:scrollView];
-    }
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
